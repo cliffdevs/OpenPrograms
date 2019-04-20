@@ -36,21 +36,6 @@ event.listen(EVENT_MODEM, messageListener)
 modem.send(drone, PORT_FOLLOW, MESSAGE_POSITION_UPDATE)
 local nodes = {select(7, event.pull(EVENT_MODEM, nil, drone, PORT_FOLLOW, nil, MESSAGE_UPDATE_NODES))}
 
---[[
-    Search for a position node to provide to the drone to follow.
---]]
-local function getNode()
-    print('Discovering waypoint node...')
-    local tbl = nav.findWaypoints(MAX_RANGE)
-    for i = 1, tbl.n do
-        local label = tbl[i].label
-        for i2 = 1, #nodes do
-            if label == nodes[i2] then
-                return label, table.unpack(tbl[i].position)
-            end
-        end
-    end
-end
 
 while true do
     local label, x, y, z = getNode()

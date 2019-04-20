@@ -45,6 +45,20 @@ function heartbeatHook(sender, port, msg)
     end
 end
 
+--[[
+    Search for a position node to provide to the drone to follow.
+--]]
+local function getNodeFromWaypoint()
+    print('Discovering waypoint node...')
+    local tbl = nav.findWaypoints(MAX_RANGE)
+    if tbl.n >= 1 then
+        local label = tbl[1].label
+        return label, table.unpack(tbl[1].position)
+    end
+
+    print('Unable to find node')
+end
+
 function follow()
     modem.open(PORT_FOLLOW)
 end
