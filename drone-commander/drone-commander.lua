@@ -14,34 +14,11 @@ local event = require('event')
 local os = require('os')
 local modem = component.modem
 local nav = component.navigation
+local droneUtilities = require('lib.drone-functions')
 
 modem.open(PORT_FOLLOW)
 
---[[
-    Request for a drone to link up
---]]
-local function findDrone()
-    print('Searching for drone...')
-    modem.broadcast(PORT_FOLLOW, 'FOLLOW_REQUEST_LINK')
-    local _, _, sender, _, _, _ = event.pull(EVENT_MODEM, nil, nil, PORT_FOLLOW, nil, 'FOLLOW_LINK')
-    print('Drone found', sender)
-    return sender
-end
-
-local drone = findDrone()
-
---[[
-    Respond to drone heartbeat requests to stay in sync
-    @sender the sender of the network message
-    @port the network port
-    @message the message
---]]
-local function heartbeatHook(sender, port, msg)
-    if sender == drone and port == PORT_FOLLOW and msg == 'HEARTBEAT_REQUEST' then
-        print('Responding to heartbeat request...', drone, port)
-        modem.send(sender, port, 'HEARTBEAT_RESPONSE')
-    end
-end
+local drone = droneUtilities.findDrone()
 
 --[[
     Hook to listen and respond to networked messages. Add all event listeners in this main listener.
@@ -51,7 +28,7 @@ end
 --]]
 local function messageListener(_, _, sender, port, _, message)
     print('Network event received...')
-    heartbeatHook(sender, port, message)
+    droneUtilities.heartbeatHook(sender, port, message)
 end
 
 event.listen(EVENT_MODEM, messageListener)
